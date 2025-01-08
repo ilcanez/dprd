@@ -3,31 +3,32 @@ session_start();
 require 'function.php'; // Koneksi ke database
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nomorRisalah = $_POST['nomor_risalah'];
-    $judulDokumen = $_POST['judul_dokumen'];
-    $tanggalRapat = $_POST['tanggal_rapat'];
-    $penanggungJawab = $_POST['penanggung_jawab'];
-    $status = $_POST['status'];
+    $noSurat = $_POST['no_surat'];
+    $tglSurat = $_POST['tgl_surat'];
+    $tglDiterima = $_POST['tgl_diterima'];
+    $perihal = $_POST['perihal'];
+    $asalSurat = $_POST['asal_surat'];
+    $keterangan = $_POST['keterangan'];
 
-    // Periksa apakah nomor_risalah sudah ada
-    $checkQuery = "SELECT * FROM risalah WHERE nomor_risalah = '$nomorRisalah'";
+    // Periksa apakah nomor surat sudah ada
+    $checkQuery = "SELECT * FROM tb_suratmasuk WHERE no_surat = '$noSurat'";
     $result = mysqli_query($conn, $checkQuery);
 
     if (mysqli_num_rows($result) > 0) {
-        $_SESSION['message'] = "Nomor Risalah sudah ada. Gunakan nomor lain.";
+        $_SESSION['message'] = "Nomor Surat sudah ada. Gunakan nomor lain.";
     } else {
         // Proses file upload
         $targetDir = "uploads/";
-        $fileName = basename($_FILES["document"]["name"]);
+        $fileName = basename($_FILES["file_surat"]["name"]);
         $targetFilePath = $targetDir . $fileName;
 
-        if (move_uploaded_file($_FILES["document"]["tmp_name"], $targetFilePath)) {
+        if (move_uploaded_file($_FILES["file_surat"]["tmp_name"], $targetFilePath)) {
             // Simpan data ke database
-            $sql = "INSERT INTO risalah (nomor_risalah, judul_dokumen, tanggal_rapat, penanggung_jawab, status, file_path)
-                    VALUES ('$nomorRisalah', '$judulDokumen', '$tanggalRapat', '$penanggungJawab', '$status', '$targetFilePath')";
+            $sql = "INSERT INTO tb_suratmasuk (no_surat, tgl_surat, tgl_diterima, perihal, asal_surat, keterangan, file_surat)
+                    VALUES ('$noSurat', '$tglSurat', '$tglDiterima', '$perihal', '$asalSurat', '$keterangan', '$targetFilePath')";
 
             if (mysqli_query($conn, $sql)) {
-                $_SESSION['message'] = "Dokumen berhasil diunggah!";
+                $_SESSION['message'] = "Surat berhasil diunggah!";
             } else {
                 $_SESSION['message'] = "Terjadi kesalahan: " . mysqli_error($conn);
             }
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Unggah Dokumen</title>
+    <title>Unggah Surat</title>
     <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body class="sb-nav-fixed">
@@ -71,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </nav>
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                 <div class="nav">
                             <div class="sb-sidenav-menu-heading">Utama</div>
@@ -114,10 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">Unggah Dokumen</h1>
+                    <h1 class="mt-4">Unggah Surat</h1>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Unggah Dokumen</li>
+                        <li class="breadcrumb-item active">Unggah Surat</li>
                     </ol>
 
                     <!-- Pesan Notifikasi -->
@@ -132,37 +133,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="card mb-4">
                         <div class="card-header">
-                            <i class="fas fa-upload"></i> Form Unggah Dokumen
+                            <i class="fas fa-upload"></i> Form Unggah Surat
                         </div>
                         <div class="card-body">
                             <form action="" method="POST" enctype="multipart/form-data">
                                 <div class="mb-3">
-                                    <label for="nomorRisalah" class="form-label">Nomor Risalah</label>
-                                    <input type="text" class="form-control" id="nomorRisalah" name="nomor_risalah" required>
+                                    <label for="noSurat" class="form-label">Nomor Surat</label>
+                                    <input type="text" class="form-control" id="noSurat" name="no_surat" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="judulDokumen" class="form-label">Judul Dokumen</label>
-                                    <input type="text" class="form-control" id="judulDokumen" name="judul_dokumen" required>
+                                    <label for="tglSurat" class="form-label">Tanggal Surat</label>
+                                    <input type="date" class="form-control" id="tglSurat" name="tgl_surat" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="tanggalRapat" class="form-label">Tanggal Rapat</label>
-                                    <input type="date" class="form-control" id="tanggalRapat" name="tanggal_rapat" required>
+                                    <label for="tglDiterima" class="form-label">Tanggal Diterima</label>
+                                    <input type="date" class="form-control" id="tglDiterima" name="tgl_diterima" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="penanggungJawab" class="form-label">Penanggung Jawab</label>
-                                    <input type="text" class="form-control" id="penanggungJawab" name="penanggung_jawab" required>
+                                    <label for="perihal" class="form-label">Perihal</label>
+                                    <input type="text" class="form-control" id="perihal" name="perihal" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-control" id="status" name="status" required>
-                                        <option value="">Pilih Status</option>
-                                        <option value="Diverifikasi">Diverifikasi</option>
-                                        <option value="Menunggu">Menunggu</option>
-                                    </select>
+                                    <label for="asalSurat" class="form-label">Asal Surat</label>
+                                    <input type="text" class="form-control" id="asalSurat" name="asal_surat" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="documentFile" class="form-label">File Dokumen</label>
-                                    <input type="file" class="form-control" id="documentFile" name="document" accept=".pdf,.doc,.docx" required>
+                                    <label for="keterangan" class="form-label">Keterangan</label>
+                                    <textarea class="form-control" id="keterangan" name="keterangan" rows="3"></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fileSurat" class="form-label">File Surat</label>
+                                    <input type="file" class="form-control" id="fileSurat" name="file_surat" accept=".pdf,.doc,.docx" required>
                                 </div>
                                 <button type="submit" class="btn btn-primary">Unggah</button>
                             </form>
